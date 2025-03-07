@@ -2,7 +2,7 @@
 
 ## Purposes:&#x20;
 
-1. **Synthetic Data Analysis**&#x20;
+1. **Synthetic Data Generation**&#x20;
 2. **Fine-Tuning**&#x20;
 3. **Pre-Training**/Post-Training
 4. **And Other Applications**&#x20;
