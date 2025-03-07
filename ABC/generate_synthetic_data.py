@@ -5,7 +5,8 @@ import time
 from client import client
 
 # Define the base prompt
-BASE_PROMPT = """Suppose you are a specialist writer and singer, and You are asked to create a creative prompt to generate the song in bangla languge. 
+BASE_PROMPT = """Suppose you are a specialist writer and singer, and You are asked to create a creative prompt to generate the song in bangla languge. [Note] Must be in bangla. 
+
 গানঃ 
 {}
 
