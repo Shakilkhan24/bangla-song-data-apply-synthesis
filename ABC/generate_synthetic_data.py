@@ -62,7 +62,7 @@ def process_single_csv():
 
 if __name__ == "__main__":
     process_single_csv() 
-    
+    # after running this file, add the csv file like SONGS_CSV/abdul alim_song.csv
     
     
     
