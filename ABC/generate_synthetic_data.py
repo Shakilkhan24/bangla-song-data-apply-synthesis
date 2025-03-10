@@ -4,12 +4,14 @@ from google import genai
 import time
 from client import client
 
-# Define the base prompt
-BASE_PROMPT = """Translate into bangla language
-text: 
-{}
+BASE_PROMPT = """প্রদত্ত শব্দটি ব্যবহার করে বাংলায় একটি অর্থবহ ও সুসংগঠিত অনুচ্ছেদ লিখুন, যেখানে অন্তত ১০টি বাক্য থাকবে।  
+অনুচ্ছেদটি গল্প, বর্ণনা বা চিন্তাশীল কোনো প্রসঙ্গ নিয়ে হতে পারে।  
 
+শব্দ:  
+{}  
 """
+
+
 
 def generate_prompt(song_text):
     try:
@@ -27,18 +29,17 @@ def process_csv(file_path):
     df = pd.read_csv(file_path)
     
     # Check if syn_prompt column already exists
-    if 'syn_prompt' in df.columns:
+    if 'paragraph' in df.columns:
         print("syn_prompt column already exists. Skipping file.")
         return
     
     # Add new column for prompts
-    df['syn_prompt'] = None
+    df['paragraph'] = None
     
     # Process each song
     for index, row in df.iterrows():
-        print(f"Processing song {index + 1}/{len(df)}: {row['Title']}")
-        prompt = generate_prompt(row['Song'])
-        df.at[index, 'syn_prompt'] = prompt
+        prompt = generate_prompt(row['word'])
+        df.at[index, 'paragraph'] = prompt
         
         # Add delay to avoid rate limiting
         time.sleep(1)
