@@ -2,9 +2,9 @@ from datasets import load_dataset, DatasetDict
 from huggingface_hub import HfApi
 
 # Load your CSV file
-dataset = load_dataset("csv", data_files="awesome_chatgpt_prompts.csv")
+dataset = load_dataset("csv", data_files="added_csv.csv")
 
-repo_name = "Shakil2448868/bangla-awesome_chatgpt_prompts"
+repo_name = "Shakil2448868/bangla-word-to-paragraph"
 
 dataset.push_to_hub(repo_name)
 
