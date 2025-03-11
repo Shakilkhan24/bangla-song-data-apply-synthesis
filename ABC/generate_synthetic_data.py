@@ -22,16 +22,24 @@ def generate_prompt(song_text):
         print(f"Error generating prompt: {str(e)}")
         return None
 
-def process_csv(file_path):
+def process_csv(file_path, start_row, end_row):
     # Read the CSV file
     df = pd.read_csv(file_path)
+    
+    # Validate row range
+    total_rows = len(df)
+    if start_row < 0 or end_row > total_rows or start_row >= end_row:
+        print(f"Invalid row range! CSV contains {total_rows} rows.")
+        return
+    
+    # Select the specific range of rows
+    df = df.iloc[start_row:end_row].copy()
     
     # Check if 'paragraph' column already exists
     if 'paragraph' in df.columns:
         print("'paragraph' column already exists. Skipping file.")
         return
     
-    # Add new column for generated text
     df['paragraph'] = None
     
     # Process in chunks of 100 rows
@@ -40,7 +48,7 @@ def process_csv(file_path):
     
     for batch_num in range(num_batches):
         start_idx = batch_num * batch_size
-        end_idx = start_idx + batch_size
+        end_idx = min(start_idx + batch_size, len(df))
         batch_df = df.iloc[start_idx:end_idx].copy()
         
         print(f"Processing batch {batch_num + 1} of {num_batches}...")
@@ -52,7 +60,7 @@ def process_csv(file_path):
             time.sleep(1)
         
         # Save each batch separately
-        output_filename = f"100_{batch_num + 1}.csv"
+        output_filename = f"{file_path.stem}_batch__{batch_num + 1}.csv"
         batch_df.to_csv(output_filename, index=False, encoding='utf-8-sig')
         print(f"Batch {batch_num + 1} saved as {output_filename}")
 
@@ -64,7 +72,12 @@ def process_single_csv():
         print(f"File not found: {file_path}")
         return
     
-    process_csv(file_path)
+    try:
+        start_row = int(input("Enter the starting row number: ").strip())
+        end_row = int(input("Enter the ending row number: ").strip())
+        process_csv(file_path, start_row, end_row)
+    except ValueError:
+        print("Invalid input! Please enter valid integers for row range.")
 
 if __name__ == "__main__":
     process_single_csv()
