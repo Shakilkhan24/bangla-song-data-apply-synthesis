@@ -4,9 +4,9 @@ from google import genai
 import time
 
 # Initialize the Gemini client
-client = genai.Client(api_key="AIzaSyAcD1SFmVkmfefm7PXUw2WKVaEAqAMhHOs")
+client = genai.Client(api_key="AIzaSyDULaVFmnHqDH40GYAxxwxUuLP0MScP-P8")
 
-# AIzaSyAcD1SFmVkmfefm7PXUw2WKVaEAqAMhHOs
+# AIzaSyBWMNHNseJdZkaTYP1AHBh3RXeasbI2i-s original 
 
 
-# AIzaSyA4JBfVDzO8BJUcMZ3WneGdkv59V3GVQX4
+# sk245 AIzaSyDr1qOuPYTysedTQH9nQWZVGUZmJwg3WM4

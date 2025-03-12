@@ -1,14 +1,14 @@
 import pandas as pd
 from pathlib import Path
+from google import genai
 import time
 from client import client
-from tqdm import tqdm
 
-BASE_PROMPT = """প্রদত্ত শব্দটি ব্যবহার করে বাংলায় একটি অর্থবহ ও সুসংগঠিত অনুচ্ছেদ লিখুন, যেখানে অন্তত ১০টি বাক্য থাকবে।  
-অনুচ্ছেদটি গল্প, বর্ণনা বা চিন্তাশীল কোনো প্রসঙ্গ নিয়ে হতে পারে।  
+# Define the base prompt
+BASE_PROMPT = """Suppose you are a specialist writer and singer, and You are asked to create a creative prompt to generate the song in bangla languge. 
+গানঃ 
+{}
 
-শব্দ:  
-{}  
 """
 
 def generate_prompt(song_text):
@@ -22,62 +22,60 @@ def generate_prompt(song_text):
         print(f"Error generating prompt: {str(e)}")
         return None
 
-def process_csv(file_path, start_row, end_row):
+def process_csv(file_path):
     # Read the CSV file
     df = pd.read_csv(file_path)
     
-    # Validate row range
-    total_rows = len(df)
-    if start_row < 0 or end_row > total_rows or start_row >= end_row:
-        print(f"Invalid row range! CSV contains {total_rows} rows.")
+    # Check if syn_prompt column already exists
+    if 'syn_prompt' in df.columns:
+        print("syn_prompt column already exists. Skipping file.")
         return
     
-    # Select the specific range of rows
-    df = df.iloc[start_row:end_row].copy()
+    # Add new column for prompts
+    df['syn_prompt'] = None
     
-    # Check if 'paragraph' column already exists
-    if 'paragraph' in df.columns:
-        print("'paragraph' column already exists. Skipping file.")
-        return
-    
-    df['paragraph'] = None
-    
-    # Process in chunks of 100 rows
-    batch_size = 100
-    num_batches = (len(df) // batch_size) + (1 if len(df) % batch_size != 0 else 0)
-    
-    for batch_num in range(num_batches):
-        start_idx = batch_num * batch_size
-        end_idx = min(start_idx + batch_size, len(df))
-        batch_df = df.iloc[start_idx:end_idx].copy()
+    # Process each song
+    for index, row in df.iterrows():
+        print(f"Processing song {index + 1}/{len(df)}: {row['Title']}")
+        prompt = generate_prompt(row['Song'])
+        df.at[index, 'syn_prompt'] = prompt
         
-        print(f"Processing batch {batch_num + 1} of {num_batches}...")
-        for index, row in tqdm(batch_df.iterrows(), total=len(batch_df), desc=f"Batch {batch_num + 1}"):
-            prompt = generate_prompt(row['word'])
-            batch_df.at[index, 'paragraph'] = prompt
-            
-            # Add delay to avoid rate limiting
-            time.sleep(1)
-        
-        # Save each batch separately
-        output_filename = f"{file_path.stem}_batch__{batch_num + 1}.csv"
-        batch_df.to_csv(output_filename, index=False, encoding='utf-8-sig')
-        print(f"Batch {batch_num + 1} saved as {output_filename}")
+        # Add delay to avoid rate limiting
+        time.sleep(1)
+    
+    # Save the updated CSV (overwrite the original file)
+    df.to_csv(file_path, index=False, encoding='utf-8-sig')
+    print(f"\nUpdated file saved to: {file_path}")
 
-def process_single_csv():
-    csv_file = input("Enter the CSV file name (e.g., Abdul_Alim_songs.csv): ").strip()
-    file_path = Path(__file__).parent / csv_file
+def process_all_csvs(folder_path):
+    # Get all CSV files in the folder
+    csv_files = list(folder_path.glob("*.csv"))
     
-    if not file_path.exists():
-        print(f"File not found: {file_path}")
+    if not csv_files:
+        print(f"No CSV files found in {folder_path}")
         return
     
-    try:
-        start_row = int(input("Enter the starting row number: ").strip())
-        end_row = int(input("Enter the ending row number: ").strip())
-        process_csv(file_path, start_row, end_row)
-    except ValueError:
-        print("Invalid input! Please enter valid integers for row range.")
+    print(f"Found {len(csv_files)} CSV files to process")
+    
+    # Process each CSV file
+    for i, csv_file in enumerate(csv_files):
+        print(f"\nProcessing file {i + 1}/{len(csv_files)}: {csv_file.name}")
+        process_csv(csv_file)
+        print(f"Completed processing {csv_file.name}")
+
+def main():
+    # Get the folder path
+    folder_name = input("Enter the folder name containing CSV files (e.g., SONGS_CSV): ").strip()
+    folder_path = Path(__file__).parent / folder_name
+    
+    # Check if folder exists
+    if not folder_path.exists():
+        print(f"Folder not found: {folder_path}")
+        return
+    
+    # Process all CSV files
+    process_all_csvs(folder_path)
 
 if __name__ == "__main__":
-    process_single_csv()
+    main() 
+    
